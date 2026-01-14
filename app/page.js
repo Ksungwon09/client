@@ -124,6 +124,7 @@ export default function Home() {
             <AnimatePresence>
               {error && (
                 <motion.div
+                  key="error-message"
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
@@ -138,6 +139,7 @@ export default function Home() {
             <AnimatePresence>
               {shortCode && (
                 <motion.div
+                  key="result-card"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-8 pt-8 border-t border-slate-700/50"
@@ -155,8 +157,8 @@ export default function Home() {
                     <button
                       onClick={copyToClipboard}
                       className={`p-3 rounded-lg font-bold text-sm transition-all flex items-center gap-2 ${copied
-                          ? 'bg-green-500/20 text-green-400'
-                          : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'
+                        ? 'bg-green-500/20 text-green-400'
+                        : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'
                         }`}
                     >
                       {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
