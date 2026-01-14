@@ -1,65 +1,185 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Copy, Check, Sparkles, Zap } from 'lucide-react';
 
 export default function Home() {
+  const [url, setUrl] = useState('');
+  const [shortCode, setShortCode] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState('');
+  const [origin, setOrigin] = useState('');
+
+  useEffect(() => {
+    const hostname = window.location.hostname;
+    if (hostname.includes('igise.site')) {
+      setOrigin('https://link.igise.site');
+    } else {
+      setOrigin(window.location.origin);
+    }
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setShortCode(null);
+
+    try {
+      const res = await fetch('/api/shorten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+
+      if (!res.ok) throw new Error('Failed to shorten URL');
+      const data = await res.json();
+      setShortCode(data.shortCode);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(`${origin}/${shortCode}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#050511] font-sans selection:bg-purple-500/30">
+
+      {/* Cyberpunk Grid Background */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,24,27,0)_0%,#050511_100%),linear-gradient(90deg,rgba(50,50,70,0.1)_1px,transparent_1px),linear-gradient(rgba(50,50,70,0.1)_1px,transparent_1px)] bg-[size:40px_40px] perspective-[500px]" />
+
+      {/* Aurora Glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-purple-600/20 rounded-full blur-[120px] animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[35vw] h-[35vw] bg-blue-600/20 rounded-full blur-[100px] animate-pulse delay-1000" />
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, type: "spring" }}
+        className="relative z-10 w-full max-w-xl mx-4"
+      >
+        {/* Main Glass Card */}
+        <div className="glass rounded-[2rem] p-1 bg-gradient-to-br from-white/10 to-white/5 border border-white/10 shadow-[0_0_40px_-10px_rgba(139,92,246,0.3)]">
+          <div className="bg-[#0f172a]/80 backdrop-blur-xl rounded-[1.8rem] p-8 md:p-12 relative overflow-hidden">
+
+            {/* Neon Border Effect */}
+            <div className="absolute inset-0 rounded-[1.8rem] border border-blue-500/20 pointer-events-none" />
+
+            {/* Header */}
+            <div className="text-center mb-10 space-y-2">
+              <motion.h1
+                className="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#d946ef] via-[#8b5cf6] to-[#3b82f6] drop-shadow-lg tracking-tight"
+                animate={{ backgroundPosition: ['0%', '100%'] }}
+                transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+              >
+                Vibe Link.
+              </motion.h1>
+              <p className="text-slate-400 text-sm tracking-widest uppercase opacity-70 flex items-center justify-center gap-2">
+                <Sparkles className="w-4 h-4 text-purple-400" />
+                Premium URL Shortener
+                <Sparkles className="w-4 h-4 text-purple-400" />
+              </p>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="group relative">
+                <input
+                  type="url"
+                  placeholder="Paste your long link here..."
+                  className="input-neon w-full h-14 rounded-xl px-5 text-slate-200 placeholder:text-slate-500 outline-none text-lg font-medium tracking-wide"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  required
+                />
+
+                {/* Decorative corner accents */}
+                <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-purple-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-neon w-full h-14 rounded-xl text-white font-bold text-lg tracking-wide shadow-lg shadow-purple-900/40 flex items-center justify-center gap-2 group"
+              >
+                {loading ? (
+                  <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    Shorten It <Zap className="w-5 h-5 group-hover:fill-yellow-400 group-hover:text-yellow-400 transition-all" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="text-red-400 text-center mt-4 text-sm font-medium"
+                >
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Result Selection */}
+            <AnimatePresence>
+              {shortCode && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-8 pt-8 border-t border-slate-700/50"
+                >
+                  <p className="text-center text-green-400 font-medium mb-4 text-sm tracking-wide">
+                    Your Vibe Link is ready! 🚀
+                  </p>
+
+                  <div className="bg-slate-900/80 rounded-xl p-2 flex items-center gap-2 border border-slate-700 hover:border-slate-600 transition-colors">
+                    <div className="flex-1 px-4 py-2 font-mono text-slate-300 truncate">
+                      <span className="text-slate-500">{origin}/</span>
+                      <span className="text-purple-400 font-bold">{shortCode}</span>
+                    </div>
+
+                    <button
+                      onClick={copyToClipboard}
+                      className={`p-3 rounded-lg font-bold text-sm transition-all flex items-center gap-2 ${copied
+                          ? 'bg-green-500/20 text-green-400'
+                          : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'
+                        }`}
+                    >
+                      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      {copied ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
+
+                  <div className="text-center mt-4">
+                    <div className="h-1 w-20 bg-gradient-to-r from-transparent via-slate-700 to-transparent mx-auto" />
+                  </div>
+
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+        {/* Footer */}
+        <p className="text-center text-slate-600 text-xs mt-8">
+          Created with Vibe Engine v1.0 • <a href="/admin" className="hover:text-purple-500 transition-colors">Admin Access</a>
+        </p>
+      </motion.div>
+    </main>
   );
 }
