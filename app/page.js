@@ -1,3 +1,6 @@
+const [mounted, setMounted] = useState(false);
+useEffect(() => { setMounted(true); }, []);
+if (!mounted) return null; // 마운트 전에는 로딩 UI 혹은 빈 화면 출력
 'use client';
 
 import { useState, useEffect } from 'react';
