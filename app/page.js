@@ -11,8 +11,10 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
   const [origin, setOrigin] = useState('');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const hostname = window.location.hostname;
     if (hostname.includes('igise.site')) {
       setOrigin('https://link.igise.site');
@@ -20,6 +22,8 @@ export default function Home() {
       setOrigin(window.location.origin);
     }
   }, []);
+
+  if (!mounted) return <div className="min-h-screen bg-[#050511]" />;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
